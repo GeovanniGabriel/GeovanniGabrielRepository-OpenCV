@@ -17,6 +17,7 @@ import org.opencv.android.BaseLoaderCallback
 import org.opencv.android.LoaderCallbackInterface
 import org.opencv.android.OpenCVLoader
 import org.opencv.core.*
+import org.opencv.core.Core.*
 import org.opencv.imgproc.Imgproc.resize
 import org.opencv.objdetect.CascadeClassifier
 import java.io.File
@@ -32,6 +33,7 @@ class MainActivity : CameraActivity(), CvCameraViewListener2 {
     var faceDetector: CascadeClassifier? = null
     lateinit var faceDir: File
     private var imageRatio = 0.0
+    private var screenRotation = 0
 
     private val mLoaderCallback: BaseLoaderCallback = object : BaseLoaderCallback(this) {
         override fun onManagerConnected(status: Int) {
@@ -73,15 +75,19 @@ class MainActivity : CameraActivity(), CvCameraViewListener2 {
                 // Monitors orientation values to determine the target rotation value
                 when (orientation) {
                     in 45..134 -> {
+                        screenRotation = 270
                         rotationTV.text = getString(R.string.n_270_degree)
                     }
                     in 135..224 -> {
+                        screenRotation = 180
                         rotationTV.text = getString(R.string.n_180_degree)
                     }
                     in 225..314 -> {
+                        screenRotation = 90
                         rotationTV.text = getString(R.string.n_90_degree)
                     }
                     else -> {
+                        screenRotation = 0
                         rotationTV.text = getString(R.string.n_0_degree)
                     }
                 }
@@ -134,14 +140,28 @@ class MainActivity : CameraActivity(), CvCameraViewListener2 {
     }
 
     private fun get480Image(src: Mat): Mat {
-        val imageSize = Size(src.width().toDouble(), src.height().toDouble())
+        val imageSize = Size(
+            src.width().toDouble(),
+            src.height().toDouble()
+        )
         imageRatio = ratioTo480(imageSize)
 
-        if (imageRatio.equals(1.0)) return src
-
-        val dstSize = Size(imageSize.width * imageRatio, imageSize.height * imageRatio)
+        // Downsize image
         val dst = Mat()
+        val dstSize = Size(
+            imageSize.width * imageRatio,
+            imageSize.height * imageRatio
+        )
         resize(src, dst, dstSize)
+
+        // Check rotation
+        when (screenRotation) {
+            0 -> {
+                rotate(dst, dst, ROTATE_90_CLOCKWISE)
+                flip(dst, dst, 1)
+            }
+        }
+
         return dst
     }
 
@@ -199,37 +219,65 @@ class MainActivity : CameraActivity(), CvCameraViewListener2 {
 
     private fun drawFaceRectangle() {
         val faceRects = MatOfRect()
-
         faceDetector!!.detectMultiScale(
             grayMat,
             faceRects
         )
 
+        val scrW = imageMat.width().toDouble()
+        val scrH = imageMat.height().toDouble()
+
         for (rect in faceRects.toArray()) {
-            var x = 0.0
-            var y = 0.0
+            var x = rect.x.toDouble()
+            var y = rect.y.toDouble()
             var w = 0.0
             var h = 0.0
+            var rw = rect.width.toDouble() // rectangle width
+            var rh = rect.height.toDouble() // rectangle height
 
             if (imageRatio.equals(1.0)) {
-                x = rect.x.toDouble()
-                y = rect.y.toDouble()
-                w = x + rect.width
-                h = y + rect.height
+                w = x + rw
+                h = y + rh
             } else {
-                x = rect.x.toDouble() / imageRatio
-                y = rect.y.toDouble() / imageRatio
-                w = x + (rect.width / imageRatio)
-                h = y + (rect.height / imageRatio)
+                x /= imageRatio
+                y /= imageRatio
+                rw /= imageRatio
+                rh /= imageRatio
+                w = x + rw
+                h = y + rh
             }
 
-            Imgproc.rectangle(
-                imageMat,
-                Point(x, y),
-                Point(w, h),
-                Scalar(255.0, 0.0, 0.0)
-            )
+            when (screenRotation) {
+                90 -> {
+                    rectFace(x, y, w, h, RED)
+                    drawDot(x, y, GREEN)
+                }
+                0 -> {
+                    rectFace(y, x, h, w, RED)
+                    drawDot(y, x, GREEN)
+                }
+            }
         }
+    }
+
+    private fun drawDot(x: Double, y: Double, color: Scalar) {
+        Imgproc.circle(
+            imageMat, // image
+            Point(x, y),  // center
+            4, // radius
+            color, // RGB
+            -1, // thickness: -1 = filled in
+            8 // line type
+        )
+    }
+
+    private fun rectFace(x: Double, y: Double, w: Double, h: Double, color: Scalar) {
+        Imgproc.rectangle(
+            imageMat, // image
+            Point(x, y), // upper corner
+            Point(w, h),  // opposite corner
+            color  // RGB
+        )
     }
 
     companion object {
@@ -237,5 +285,9 @@ class MainActivity : CameraActivity(), CvCameraViewListener2 {
         private const val FACE_DIR = "facelib"
         private const val FACE_MODEL = "haarcascade_frontalface_alt2.xml"
         private const val byteSize = 4096
+        private val YELLOW = Scalar(255.0, 255.0, 0.0)
+        private val BLUE = Scalar(0.0, 0.0, 255.0)
+        private val RED = Scalar(255.0, 0.0, 0.0)
+        private val GREEN = Scalar(0.0, 255.0, 0.0)
     }
 }
