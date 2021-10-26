@@ -4,9 +4,11 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.os.Bundle
 import android.util.Log
+import android.view.OrientationEventListener
 import android.view.SurfaceView
 import android.view.View
 import android.view.WindowManager
+import android.widget.TextView
 import org.opencv.imgproc.Imgproc
 import org.opencv.android.CameraActivity
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2
@@ -23,6 +25,7 @@ import java.io.IOException
 
 class MainActivity : CameraActivity(), CvCameraViewListener2 {
 
+    private lateinit var rotationTV: TextView
     private var mOpenCvCameraView: CameraBridgeViewBase? = null
     private lateinit var imageMat: Mat
     private lateinit var grayMat: Mat
@@ -62,6 +65,34 @@ class MainActivity : CameraActivity(), CvCameraViewListener2 {
         mOpenCvCameraView!!.visibility = SurfaceView.VISIBLE
         mOpenCvCameraView!!.setCameraIndex(CameraCharacteristics.LENS_FACING_FRONT)
         mOpenCvCameraView!!.setCvCameraViewListener(this)
+
+        rotationTV = findViewById<View>(R.id.rotationTV) as TextView
+
+        val mOrientationEventListener = object : OrientationEventListener(this) {
+            override fun onOrientationChanged(orientation: Int) {
+                // Monitors orientation values to determine the target rotation value
+                when (orientation) {
+                    in 45..134 -> {
+                        rotationTV.text = getString(R.string.n_270_degree)
+                    }
+                    in 135..224 -> {
+                        rotationTV.text = getString(R.string.n_180_degree)
+                    }
+                    in 225..314 -> {
+                        rotationTV.text = getString(R.string.n_90_degree)
+                    }
+                    else -> {
+                        rotationTV.text = getString(R.string.n_0_degree)
+                    }
+                }
+
+            }
+        }
+        if (mOrientationEventListener.canDetectOrientation()) {
+            mOrientationEventListener.enable();
+        } else {
+            mOrientationEventListener.disable();
+        }
     }
 
     override fun onCameraViewStarted(width: Int, height: Int) {

@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">MiPrimerOpenCV</string>
+    <string name="app_name">OpenCV Camera Demo</string>
+    <string name="n_90_degree" translatable="false">90</string>
+    <string name="n_180_degree" translatable="false">180</string>
+    <string name="n_270_degree" translatable="false">270</string>
+    <string name="n_0_degree" translatable="false">0</string>
 </resources>
