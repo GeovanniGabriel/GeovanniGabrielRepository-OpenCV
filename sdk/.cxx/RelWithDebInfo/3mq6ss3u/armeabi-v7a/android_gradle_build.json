@@ -1,0 +1,39 @@
+{
+  "stringTable": {},
+  "buildFiles": [
+    "/Users/gsanchezr/Documents/Repos Geo/MiPrimerOpenCV/sdk/libcxx_helper/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/gsanchezr/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja",
+      "-C",
+      "/Users/gsanchezr/Documents/Repos Geo/MiPrimerOpenCV/sdk/.cxx/RelWithDebInfo/3mq6ss3u/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/gsanchezr/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja",
+    "-C",
+    "/Users/gsanchezr/Documents/Repos Geo/MiPrimerOpenCV/sdk/.cxx/RelWithDebInfo/3mq6ss3u/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "opencv_jni_shared-RelWithDebInfo-armeabi-v7a": {
+      "buildCommandComponents": [
+        "/Users/gsanchezr/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja",
+        "-C",
+        "/Users/gsanchezr/Documents/Repos Geo/MiPrimerOpenCV/sdk/.cxx/RelWithDebInfo/3mq6ss3u/armeabi-v7a",
+        "opencv_jni_shared"
+      ],
+      "buildType": "release",
+      "abi": "armeabi-v7a",
+      "artifactName": "opencv_jni_shared",
+      "output": "/Users/gsanchezr/Documents/Repos Geo/MiPrimerOpenCV/sdk/.cxx/RelWithDebInfo/3mq6ss3u/armeabi-v7a/libopencv_jni_shared.a"
+    }
+  },
+  "toolchains": {},
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}
